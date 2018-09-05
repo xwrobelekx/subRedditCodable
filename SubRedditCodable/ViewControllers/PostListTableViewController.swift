@@ -8,88 +8,77 @@
 
 import UIKit
 
-class PostListTableViewController: UITableViewController {
-
+class PostListTableViewController: UITableViewController, UISearchBarDelegate {
+    
+    
+    @IBOutlet weak var searchBar: UISearchBar!
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
+        searchBar.delegate = self
+        
+        tableView.estimatedRowHeight = 200
+        tableView.rowHeight = UITableViewAutomaticDimension
+        
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    
+    //MARK: - Fetch Functions
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
+        UIApplication.shared.isNetworkActivityIndicatorVisible = true
+        
+        guard let searchTerm = searchBar.text?.lowercased() else {return}
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
+        
+        //called fetch once i got the search word
+        
+        PostController.shared.fetchPost(bySearchTerm: searchTerm) {
+            //FIXME: not sure what i want to do here?
+            DispatchQueue.main.async {
+                
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                
+                self.title = "\(searchTerm)"
+                self.tableView.reloadData()
+            }
+        }
+        
+        //FIXME: i was thinking of putting the fetch func for thumbnail here, or in the cell
     }
-
+    
+    
     // MARK: - Table view data source
-
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
-        return 0
-    }
-
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        return 0
+        //FIXME: how do i get the data to poulate the tableview
+        return PostController.shared.posts.count
     }
-
-    /*
+    
+    
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
-
-        // Configure the cell...
-
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "postCell", for: indexPath) as? PostCellTableViewCell else {return UITableViewCell() }
+        let post = PostController.shared.posts[indexPath.row]
+        //FIXME: wasnt sure why i should put the thumbnail fetch functon here.
+        
+        PostController.shared.fetchThumbnails(thumbnailURL: post.thumbnailEndpoint) { (image) in
+            //FIXME: not sure what to do here
+            // im getting the picture - i need to send it over to my cell - then update views
+            //how?
+            // how about another property observer? - turned out its needed
+            DispatchQueue.main.async {
+                //FIXME: why do we need to chcek the curent cell index if we can pull the index from tableview indexPath - does this have to do anything with reusable cells?
+                cell.postToPresent = post
+                if let curentIndexPath = self.tableView?.indexPath(for: cell),
+                    curentIndexPath == indexPath {
+                    cell.thumbnail = image
+                } else {
+                    print("Got image for now - reused cell")
+                    return // cell has been reused
+                }
+            }
+        }
         return cell
     }
-    */
-
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
-    }
-    */
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

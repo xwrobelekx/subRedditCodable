@@ -16,6 +16,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+//        PostController.shared.fetchPost(bySearchTerm: "funny") { (post) in
+//            print(Post.self)
+//        }
         return true
     }
 
